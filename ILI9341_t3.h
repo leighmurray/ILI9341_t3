@@ -173,27 +173,26 @@ typedef struct {
 #ifdef __cplusplus
 // At all other speeds, ILI9241_KINETISK__pspi->beginTransaction() will use the fastest available clock
 #include <SPI.h>
+#include <Adafruit_GFX.h>
+
 #define ILI9341_SPICLOCK 30000000
 #define ILI9341_SPICLOCK_READ 6500000
 
-class ILI9341_t3 : public Print
+class ILI9341_t3 : public Adafruit_GFX
 {
   public:
 	ILI9341_t3(uint8_t _CS, uint8_t _DC, uint8_t _RST = 255, uint8_t _MOSI=11, uint8_t _SCLK=13, uint8_t _MISO=12);
 	void begin(void);
-  	void sleep(bool enable);		
-        void setClock(unsigned long clk) { _clock = clk;}
+  	void sleep(bool enable);
+    void setClock(unsigned long clk) { _clock = clk;}
 	void pushColor(uint16_t color);
-	void fillScreen(uint16_t color);
 	void drawPixel(int16_t x, int16_t y, uint16_t color);
 	void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
 	void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-			
+
 	void fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color1, uint16_t color2);
 	void fillRectVGradient(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color1, uint16_t color2);
-	void fillScreenVGradient(uint16_t color1, uint16_t color2);
-	void fillScreenHGradient(uint16_t color1, uint16_t color2);
 
 	void setRotation(uint8_t r);
 	void setScroll(uint16_t offset);
@@ -210,7 +209,7 @@ class ILI9341_t3 : public Print
 		g = (color>>3)&0x00FC;
 		b = (color<<3)&0x00F8;
 	}
-	
+
 	//color565toRGB14		- converts 16 bit 565 format color to 14 bit RGB (2 bits clear for math and sign)
 	//returns 00rrrrr000000000,00gggggg00000000,00bbbbb000000000
 	//thus not overloading sign, and allowing up to double for additions for fixed point delta
@@ -219,13 +218,13 @@ class ILI9341_t3 : public Print
 		g = (color<<3)&0x3F00;
 		b = (color<<9)&0x3E00;
 	}
-	
+
 	//RGB14tocolor565		- converts 14 bit RGB back to 16 bit 565 format color
 	static uint16_t RGB14tocolor565(int16_t r, int16_t g, int16_t b)
 	{
 		return (((r & 0x3E00) << 2) | ((g & 0x3F00) >>3) | ((b & 0x3E00) >> 9));
 	}
-	
+
 	//uint8_t readdata(void);
 	uint8_t readcommand8(uint8_t reg, uint8_t index = 0);
 	uint16_t readScanLine();
@@ -245,13 +244,13 @@ class ILI9341_t3 : public Print
 	//					color palette data in array at palette
 	//					width must be at least 2 pixels
 	void writeRect4BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette );
-	
+
 	// writeRect2BPP - 	write 2 bit per pixel paletted bitmap
 	//					bitmap data in array at pixels, 4 bits per pixel
 	//					color palette data in array at palette
 	//					width must be at least 4 pixels
 	void writeRect2BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette );
-	
+
 	// writeRect1BPP - 	write 1 bit per pixel paletted bitmap
 	//					bitmap data in array at pixels, 4 bits per pixel
 	//					color palette data in array at palette
@@ -259,50 +258,29 @@ class ILI9341_t3 : public Print
 	void writeRect1BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *pixels, const uint16_t * palette );
 
 	// from Adafruit_GFX.h
-	void drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 	void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color);
-	void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
-	void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color);
-	void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
-	void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
-	void drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h, int16_t radius, uint16_t color);
-	void fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h, int16_t radius, uint16_t color);
-	void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color);
-	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size);
+	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y);
 	void setCursor(int16_t x, int16_t y);
     void getCursor(int16_t *x, int16_t *y);
-	void setTextColor(uint16_t c);
-	void setTextColor(uint16_t c, uint16_t bg);
-	void setTextSize(uint8_t s);
 	uint8_t getTextSize();
-	void setTextWrap(boolean w);
+	void getTextSize(int16_t *x, int16_t *y);
 	boolean getTextWrap();
 	virtual size_t write(uint8_t);
-	int16_t width(void)  { return _width; }
-	int16_t height(void) { return _height; }
-	uint8_t getRotation(void);
 	void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
 	void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-	int16_t getCursorX(void) const { return cursor_x; }
-	int16_t getCursorY(void) const { return cursor_y; }
 	void setFont(const ILI9341_t3_font_t &f) { font = &f; }
 	void setFontAdafruit(void) { font = NULL; }
 	void drawFontChar(unsigned int c);
 	void measureChar(uint8_t c, uint16_t* w, uint16_t* h);
-	uint16_t fontCapHeight() { return (font) ? font->cap_height : textsize * 8; }
-	uint16_t fontLineSpace() { return (font) ? font->line_space : textsize * 8; }
+	uint16_t fontCapHeight() { return (font) ? font->cap_height : textsize_y * 8; }
+	uint16_t fontLineSpace() { return (font) ? font->line_space : textsize_y * 8; }
 	uint16_t fontGap() { return (font) ? font->line_space - font->cap_height : 0; };
 	uint16_t measureTextWidth(const char* text, int chars = 0);
 	uint16_t measureTextHeight(const char* text, int chars = 0);
 	int16_t strPixelLen(char * str);
 
  protected:
-        unsigned long _clock = ILI9341_SPICLOCK;
-	int16_t _width, _height; // Display w/h as modified by current rotation
-	int16_t  cursor_x, cursor_y;
-	uint16_t textcolor, textbgcolor;
-	uint8_t textsize, rotation;
-	boolean wrap; // If set, 'wrap' text at right edge of display
+    unsigned long _clock = ILI9341_SPICLOCK;
 	const ILI9341_t3_font_t *font;
 
   	uint8_t  _rst;
@@ -389,7 +367,7 @@ class ILI9341_t3 : public Print
 				waitTransmitComplete();
 				if (requested_tcr_state & LPSPI_TCR_PCS(3)) DIRECT_WRITE_HIGH(_dcport, _dcpinmask);
 				else DIRECT_WRITE_LOW(_dcport, _dcpinmask);
-				IMXRT_LPSPI4_S.TCR = _spi_tcr_current & ~(LPSPI_TCR_PCS(3) | LPSPI_TCR_CONT);	// go ahead and update TCR anyway?  
+				IMXRT_LPSPI4_S.TCR = _spi_tcr_current & ~(LPSPI_TCR_PCS(3) | LPSPI_TCR_CONT);	// go ahead and update TCR anyway?
 
 			}
 		}
@@ -397,7 +375,7 @@ class ILI9341_t3 : public Print
 
 	void beginSPITransaction(uint32_t clock = ILI9341_SPICLOCK) __attribute__((always_inline)) {
 		SPI.beginTransaction(SPISettings(clock, MSBFIRST, SPI_MODE0));
-		if (!_dcport) _spi_tcr_current = IMXRT_LPSPI4_S.TCR; 	// Only if DC is on hardware CS 
+		if (!_dcport) _spi_tcr_current = IMXRT_LPSPI4_S.TCR; 	// Only if DC is on hardware CS
 		if (_csport)
 			DIRECT_WRITE_LOW(_csport, _cspinmask);
 	}
@@ -449,7 +427,7 @@ class ILI9341_t3 : public Print
 	}
 
 #else
-// T3.x	
+// T3.x
 	//void waitFifoNotFull(void) __attribute__((always_inline)) {
 	void waitFifoNotFull(void) {
 		uint32_t sr;
@@ -552,37 +530,6 @@ class ILI9341_t3 : public Print
 	}
 	void drawFontBits(uint32_t bits, uint32_t numbits, uint32_t x, uint32_t y, uint32_t repeat);
 };
-
-// To avoid conflict when also using Adafruit_GFX or any Adafruit library
-// which depends on Adafruit_GFX, #include the Adafruit library *BEFORE*
-// you #include ILI9341_t3.h.
-#ifndef _ADAFRUIT_GFX_H
-class Adafruit_GFX_Button {
-public:
-	Adafruit_GFX_Button(void) { _gfx = NULL; }
-	void initButton(ILI9341_t3 *gfx, int16_t x, int16_t y,
-		uint8_t w, uint8_t h,
-		uint16_t outline, uint16_t fill, uint16_t textcolor,
-		const char *label, uint8_t textsize);
-	void drawButton(bool inverted = false);
-	bool contains(int16_t x, int16_t y);
-	void press(boolean p) {
-		laststate = currstate;
-		currstate = p;
-	}
-	bool isPressed() { return currstate; }
-	bool justPressed() { return (currstate && !laststate); }
-	bool justReleased() { return (!currstate && laststate); }
-private:
-	ILI9341_t3 *_gfx;
-	int16_t _x, _y;
-	uint16_t _w, _h;
-	uint8_t _textsize;
-	uint16_t _outlinecolor, _fillcolor, _textcolor;
-	char _label[10];
-	boolean currstate, laststate;
-};
-#endif
 
 #endif // __cplusplus
 
